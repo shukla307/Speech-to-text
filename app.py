@@ -14,7 +14,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 # Specify the full path to your FFmpeg executable
-FFMPEG_PATH = r"C:\Users\shiva\Desktop\Flask\venv\Lib\site-packages\ffmpeg"  # Update this path
+FFMPEG_PATH = r"C:\Users\shiva\Desktop\Flask\venv\Lib\site-packages\ffmpeg" 
 
 @app.route('/')
 def index():
