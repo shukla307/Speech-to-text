@@ -61,7 +61,7 @@ In the code, they use different speech recognition methods (like Google's and Sp
 
 
 
-
+https://www.loom.com/share/b1409d0e43e74f4aa92166d5ad402422
 
 
 
