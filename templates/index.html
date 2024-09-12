@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice to Text</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        button { font-size: 18px; margin: 10px; padding: 10px 20px; }
+        #result { margin-top: 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Voice to Text Converter</h1>
+    <button id="startRecord">Start Recording</button>
+    <button id="stopRecord" disabled>Stop Recording</button>
+    <div id="result"></div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById('startRecord').onclick = startRecording;
+        document.getElementById('stopRecord').onclick = stopRecording;
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    mediaRecorder.start();
+
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    document.getElementById('startRecord').disabled = true;
+                    document.getElementById('stopRecord').disabled = false;
+                });
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            document.getElementById('startRecord').disabled = false;
+            document.getElementById('stopRecord').disabled = true;
+
+            mediaRecorder.addEventListener("stop", () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioChunks = [];
+                
+                const formData = new FormData();
+                formData.append("audio", audioBlob, "recording.webm");
+
+                fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.transcription) {
+                        document.getElementById('result').textContent = "Transcription: " + data.transcription;
+                    } else if (data.error) {
+                        document.getElementById('result').textContent = "Error: " + data.error;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result').textContent = "An error occurred during transcription.";
+                });
+            });
+        }
+    </script>
+</body>
+</html>
